@@ -42,7 +42,8 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen bg-gray-900 text-white">
-      <div className="text-center py-24 bg-gradient-to-b from-black via-gray-900 to-gray-800">
+      <div className=" flex flex-row text-center py-24 bg-gradient-to-b from-black via-gray-900 to-gray-800 min-h-[60vh]">
+        <div className="w-1/2 flex flex-col items-center justify-center text-center px-8">
         <motion.h1
           className="text-4xl md:text-6xl font-bold"
           initial={{ opacity: 0, y: -20 }}
@@ -68,6 +69,17 @@ export default function HomePage() {
             </Button>
           </Link>
         </div>
+        
+        </div>
+        <div className="w-1/2 flex flex-col items-center justify-center px-8">
+      <motion.img
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        src="img.png"
+        alt="Blockchain Illustration"
+        className="mt-4 w-[500px] h-[500px] object-contain"
+      />
+    </div>
       </div>
 
       <div className="py-12 px-6">
