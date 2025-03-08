@@ -5,11 +5,10 @@ import { HardhatUserConfig } from "hardhat/config";
 dotenv.config();
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.0",
+  solidity: "0.8.20",
   networks: {
-    mumbai: {
-      url: process.env.MUMBAI_API_URL as string,
-      accounts: [process.env.PRIVATE_KEY as string],
+    localhost: {
+      url: "http://127.0.0.1:8545",
     },
   },
 };

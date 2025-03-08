@@ -19,13 +19,16 @@
   },
   "homepage": "https://github.com/aryan9653/hacksmiths_hackniche3#readme",
   "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.22.19"
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9.1.0",
+    "ethers": "^6.13.5",
+    "hardhat": "^2.22.19",
+    "typechain": "^8.3.2"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.2.0",
-    "@pinata/sdk": "^2.1.0",
-    "dotenv": "^16.4.7",
-    "web3.storage": "^4.5.5"
+    "dotenv": "^16.4.7"
   }
 }
