@@ -1,113 +1,141 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Dock } from "@/components/magicui/dock";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { ArrowLeft, User, PlusCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { DockDemo } from "./components/dock";
-
-export default function HomePage() {
-  const [campaigns, setCampaigns] = useState<
-    { id: number; title: string; amount: string }[]
-  >([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchCampaigns() {
-      try {
-        setLoading(true);
-        const data = [
-          { id: 1, title: "Decentralized Education Fund", amount: "5.2 ETH" },
-          {
-            id: 2,
-            title: "Medical Aid via Smart Contracts",
-            amount: "8.1 ETH",
-          },
-          {
-            id: 3,
-            title: "Medical Aid via Smart Contracts",
-            amount: "8.1 ETH",
-          },
-        ];
-        setCampaigns(data);
-      } catch (error) {
-        console.error("Error fetching campaigns:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchCampaigns();
-  }, []);
-
+const App: React.FC = () => {
+  const [sidebar, setSidebar] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+  const campaigns = [
+    {
+      id: 1,
+      name: "Education for All",
+      image: "/campaign1.jpg",
+      raised: "$5,000",
+      target: "$10,000",
+      donors: 120,
+    },
+    {
+      id: 2,
+      name: "Food for Needy",
+      image: "/campaign2.jpg",
+      raised: "$7,200",
+      target: "$15,000",
+      donors: 200,
+    },
+    {
+      id: 3,
+      name: "Healthcare Support",
+      image: "/campaign1.jpg",
+      raised: "$3,500",
+      target: "$8,000",
+      donors: 80,
+    },
+    {
+      id: 4,
+      name: "Disaster Relief",
+      image: "/campaign2.jpg",
+      raised: "$12,000",
+      target: "$20,000",
+      donors: 300,
+    },
+  ];
   return (
-    <div className="relative min-h-screen bg-gray-900 text-white">
-      <div className=" flex flex-row text-center py-24 bg-gradient-to-b from-black via-gray-900 to-gray-800 min-h-[60vh]">
-        <div className="w-1/2 flex flex-col items-center justify-center text-center px-8">
-        <motion.h1
-          className="text-4xl md:text-6xl font-bold"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          Empowering Ideas through Blockchain
-        </motion.h1>
-        <p className="mt-4 text-lg text-gray-300">
-          Launch, Fund, and Track Campaigns Securely
-        </p>
-        <div className="mt-6 flex justify-center gap-4">
-          <Link href="/create-campaign">
-            <Button className="px-6 py-3 bg-blue-500 hover:bg-blue-600">
-              Start a Campaign
-            </Button>
-          </Link>
-          <Link href="/campaigns">
-            <Button
-              variant="outline"
-              className="px-6 py-3 border-gray-400 text-black"
-            >
-              Explore Campaigns
-            </Button>
-          </Link>
+    <div className="bg-[#0d0d23] text-white min-h-screen py-6 px-4">
+      {/* Header Section */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <button className="text-white hover:bg-gray-700 p-2 rounded-lg">
+            <ArrowLeft size={24} />
+          </button>
+          <h1
+            className="text-3xl font-bold cursor-pointer"
+            onClick={() => setSidebar(!sidebar)}
+          >
+            Charity
+          </h1>
         </div>
-        
+        <input
+          type="text"
+          placeholder="🔍 Search campaigns..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full max-w-lg px-5 py-3 text-lg text-white bg-gray-300 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <div className="bg-gray-800 p-3 rounded-full cursor-pointer hover:bg-gray-700">
+          <User size={24} />
         </div>
-        <div className="w-1/2 flex flex-col items-center justify-center px-8">
-      <motion.img
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        src="img.png"
-        alt="Blockchain Illustration"
-        className="mt-4 w-[500px] h-[500px] object-contain"
-      />
-    </div>
+      </div>
+      {/* Donation Stats Section */}
+      <div className="flex justify-center gap-5">
+        <div className="grid grid-cols-3 gap-5 mb-8"></div>
+        {[
+          { title: "Donation Today", amount: "$8,755" },
+          { title: "Total Donor", amount: "3,544" },
+          { title: "Average Donation", amount: "$484.70" },
+        ].map((stat, index) => (
+          <div
+            key={index}
+            className="p-6 bg-gray-900 rounded-xl shadow-lg text-center"
+          >
+            <p className="text-lg text-gray-400">{stat.title}</p>
+            <p className="text-3xl font-bold">{stat.amount}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="py-12 px-6">
-        <h2 className="text-3xl font-bold">Trending Campaigns</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-          {loading ? (
-            <p className="text-gray-400">Loading campaigns...</p>
-          ) : campaigns.length > 0 ? (
-            campaigns.map((campaign) => (
-              <div
-                key={campaign.id}
-                className="p-4 border border-gray-700 rounded-lg bg-gray-800"
-              >
-                <h3 className="text-xl font-semibold">{campaign.title}</h3>
-                <p className="text-gray-400">Raised: {campaign.amount}</p>
-                <Link href={`/campaign/${campaign.id}`}>
-                  <Button className="mt-3 w-full">View Details</Button>
-                </Link>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400">No active campaigns yet.</p>
-          )}
-        </div>
+      {/* Ongoing Campaigns */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">Ongoing Campaigns</h2>
+        <button
+          className="flex items-center gap-2 px-5 py-3 bg-purple-600 rounded-lg text-white hover:bg-purple-700"
+          onClick={() => router.push("/create-campaign")}
+        >
+          <PlusCircle size={22} /> Add New Campaign
+        </button>
+      </div>
+      <div className="grid grid-cols-4 gap-6 mb-8">
+        {campaigns.map((campaign) => (
+          <div
+            key={campaign.id}
+            className="bg-gray-900 p-6 rounded-xl shadow-lg cursor-pointer hover:shadow-xl"
+            onClick={() => router.push(`/campaigns`)}
+          >
+            <img
+              src={campaign.image}
+              alt={campaign.name}
+              className="h-40 w-full object-cover rounded mb-4"
+            />
+            <p className="text-lg font-semibold">{campaign.name}</p>
+            <div className="flex gap-3 justify-between">
+              <button className="mt-3 p-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700">
+                Update Campaign
+              </button>
+              <button className="mt-3 px-9 p-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700">
+                See Details
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Past Campaigns */}
+      <h2 className="text-2xl font-semibold mb-6">Past Campaigns</h2>
+      <div className="grid grid-cols-4 gap-6">
+        {[...Array(4)].map((_, index) => (
+          <div key={index} className="bg-gray-900 p-6 rounded-xl shadow-lg">
+            <div className="h-40 bg-gray-700 rounded mb-4"></div>
+            <p className="text-lg font-semibold">Past Campaign {index + 1}</p>
+          </div>
+        ))}
       </div>
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 flex justify-center w-auto mb-8">
-        <DockDemo />
+        <DockDemo/>
       </div>
     </div>
   );
-}
+};
+
+export default App;
