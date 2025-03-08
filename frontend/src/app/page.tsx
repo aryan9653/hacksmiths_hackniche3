@@ -54,12 +54,12 @@ export default function HomePage() {
           Launch, Fund, and Track Campaigns Securely
         </p>
         <div className="mt-6 flex justify-center gap-4">
-          <Link href="/start-campaign">
+          <Link href="/create-campaign">
             <Button className="px-6 py-3 bg-blue-500 hover:bg-blue-600">
               Start a Campaign
             </Button>
           </Link>
-          <Link href="/explore">
+          <Link href="/campaigns">
             <Button
               variant="outline"
               className="px-6 py-3 border-gray-400 text-black"
