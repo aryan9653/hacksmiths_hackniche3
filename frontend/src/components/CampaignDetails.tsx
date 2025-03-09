@@ -12,6 +12,7 @@ import {
   SliderMainItem,
   SliderThumbItem,
 } from "@/components/ui/extension/carousel";
+import { Slide, toast } from "react-toastify";
 
 type Campaign = {
   creator: string;
@@ -62,7 +63,10 @@ export default function VideoDonationPage() {
       const fetchedContributors = await contract.getContributors(Number(id));
       const fetchedContributions = await Promise.all(
         fetchedContributors.map(async (contributor: string) => {
-          const contribution = await contract.getContribution(Number(id), contributor);
+          const contribution = await contract.getContribution(
+            Number(id),
+            contributor
+          );
           return contribution.toString();
         })
       );
@@ -134,7 +138,18 @@ export default function VideoDonationPage() {
   const contribute = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contribution || Number(contribution) <= 0) {
-      alert("Please enter a valid contribution amount greater than 0.");
+      // alert("Please enter a valid contribution amount greater than 0.");
+      toast.error("Please enter a valid contribution amount greater than 0.", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
       return;
     }
     setContributeLoading(true);
@@ -144,12 +159,34 @@ export default function VideoDonationPage() {
         value: ethers.parseEther(contribution),
       });
       await tx.wait();
-      alert("Contribution successful!");
+      // alert("Contribution successful!");
+      toast.success("Contribution Successfully", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
       setContribution("");
       await fetchData();
     } catch (error) {
       console.error("Error contributing:", error);
-      alert("Failed to contribute");
+      // alert("Failed to contribute");
+      toast.error("Failed to contribute", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
     } finally {
       setContributeLoading(false);
     }
@@ -161,11 +198,33 @@ export default function VideoDonationPage() {
       const contract = await getContract();
       const tx = await contract.refund(Number(id), { gasLimit: 1000000 });
       await tx.wait();
-      alert("Refund requested successfully!");
+      // alert("Refund requested successfully!");
+      toast.success("Refund requested successfully!", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
       await fetchData();
     } catch (error: any) {
       console.error("Error refunding:", error);
-      alert("Failed to refund: " + (error.reason || error.message));
+      // alert("Failed to refund: " + (error.reason || error.message));
+      toast.error("Failed to refund: " + (error.reason || error.message), {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
     } finally {
       setRefundLoading(false);
     }
@@ -177,11 +236,33 @@ export default function VideoDonationPage() {
       const contract = await getContract();
       const tx = await contract.releaseFunds(Number(id), { gasLimit: 1000000 });
       await tx.wait();
-      alert("Funds released successfully!");
+      // alert("Funds released successfully!");
+      toast.success("Funds released successfully", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
       await fetchData();
     } catch (error: any) {
       console.error("Error releasing funds:", error);
-      alert("Failed to release funds: " + (error.reason || error.message));
+      // alert("Failed to release funds: " + (error.reason || error.message));
+      toast.error("Failed to release funds:", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
     } finally {
       setReleaseLoading(false);
     }
@@ -228,9 +309,9 @@ export default function VideoDonationPage() {
     refundLoading ||
     !canRefund ||
     (isContributor &&
-      refunded[contributors.indexOf(walletAddress)] !== undefined
-        ? refunded[contributors.indexOf(walletAddress)]
-        : false);
+    refunded[contributors.indexOf(walletAddress)] !== undefined
+      ? refunded[contributors.indexOf(walletAddress)]
+      : false);
 
   // Dynamic carousel using campaign media
   const DynamicCarousel = () => {
@@ -242,7 +323,10 @@ export default function VideoDonationPage() {
       );
     }
     return (
-      <Carousel orientation="horizontal" className="flex flex-col items-center gap-2">
+      <Carousel
+        orientation="horizontal"
+        className="flex flex-col items-center gap-2"
+      >
         <CarouselMainContainer className="h-[500px] w-[1000px] bg-black">
           {campaign.mediaHashes.map((hash, index) => {
             const mediaUrl = `https://gateway.pinata.cloud/ipfs/${hash}`;
@@ -280,11 +364,7 @@ export default function VideoDonationPage() {
 
     if (isVideo) {
       return (
-        <video
-          controls
-          className="w-full h-full rounded-md"
-          preload="metadata"
-        >
+        <video controls className="w-full h-full rounded-md" preload="metadata">
           <source src={url} />
           Your browser does not support the video tag.
         </video>
@@ -326,7 +406,9 @@ export default function VideoDonationPage() {
           <h1 className="text-3xl font-bold text-white mb-4 text-center">
             {campaign.title}
           </h1>
-          <p className="text-lg text-gray-300 mb-4 break-words">{campaign.description}</p>
+          <p className="text-lg text-gray-300 mb-4 break-words">
+            {campaign.description}
+          </p>
           <div className="flex justify-between text-gray-300 text-lg mb-6">
             <p>
               <strong>Target:</strong>{" "}
@@ -397,7 +479,9 @@ export default function VideoDonationPage() {
               {refundLoading ? "Refunding..." : "Request Refund"}
             </button>
           )}
-          <h2 className="text-xl font-semibold text-gray-300 mt-4">Contributors:</h2>
+          <h2 className="text-xl font-semibold text-gray-300 mt-4">
+            Contributors:
+          </h2>
           <ul className="mt-2 space-y-2 overflow-y-auto max-h-48">
             {contributors.length > 0 ? (
               contributors.map((contributor: string, index: number) => (
@@ -407,7 +491,8 @@ export default function VideoDonationPage() {
                 >
                   <p className="text-sm">
                     {contributor}:{" "}
-                    {ethers.formatEther(BigInt(contributions[index] || "0"))} ETH
+                    {ethers.formatEther(BigInt(contributions[index] || "0"))}{" "}
+                    ETH
                     {refunded[index] && " (Refunded)"}
                   </p>
                 </li>

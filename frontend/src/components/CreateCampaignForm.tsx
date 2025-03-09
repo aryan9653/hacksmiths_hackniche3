@@ -5,6 +5,7 @@ import { getContract } from "@/lib/contract";
 import { ethers } from "ethers";
 import { CloudUpload, ArrowLeft, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Slide, toast } from "react-toastify";
 
 export default function CreateCampaignForm() {
   const router = useRouter();
@@ -18,8 +19,7 @@ export default function CreateCampaignForm() {
   // Filter to allow only images and videos
   const filterFiles = (files: File[]) =>
     files.filter(
-      (file) =>
-        file.type.startsWith("image/") || file.type.startsWith("video/")
+      (file) => file.type.startsWith("image/") || file.type.startsWith("video/")
     );
 
   // Handle file selection via input
@@ -69,7 +69,18 @@ export default function CreateCampaignForm() {
   // Handle campaign creation submission
   const handleSubmit = async () => {
     if (!title || !description || Number(goal) <= 0 || Number(duration) <= 0) {
-      alert("Please fill in all fields correctly.");
+      // alert("Please fill in all fields correctly.");
+      toast.error("Please fill in all fields correctly.", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
       return;
     }
     setLoading(true);
@@ -89,7 +100,18 @@ export default function CreateCampaignForm() {
         mediaHashes
       );
       await tx.wait();
-      alert("Campaign created successfully!");
+      // alert("Campaign created successfully!");
+      toast.success("Campaign created successfully", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
 
       // Reset form
       setTitle("");
@@ -99,7 +121,18 @@ export default function CreateCampaignForm() {
       setFiles([]);
     } catch (error) {
       console.error("Error creating campaign:", error);
-      alert("Failed to create campaign");
+      // alert("Failed to create campaign");
+      toast.success("Failed to create campaign", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
     } finally {
       setLoading(false);
     }
@@ -181,7 +214,9 @@ export default function CreateCampaignForm() {
             <div className="mt-4 w-full h-48 overflow-y-auto">
               {files.length > 0 ? (
                 <>
-                  <h2 className="text-xl font-semibold mb-2">Selected Files:</h2>
+                  <h2 className="text-xl font-semibold mb-2">
+                    Selected Files:
+                  </h2>
                   <div className="flex flex-wrap gap-4">
                     {files.map((file, index) => {
                       const isImage = file.type.startsWith("image/");
@@ -199,7 +234,9 @@ export default function CreateCampaignForm() {
                           ) : (
                             <div className="w-24 h-24 flex flex-col items-center justify-center">
                               <Video className="w-8 h-8 text-white" />
-                              <p className="text-sm text-center text-white">{file.name}</p>
+                              <p className="text-sm text-center text-white">
+                                {file.name}
+                              </p>
                             </div>
                           )}
                         </div>

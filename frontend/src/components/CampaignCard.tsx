@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { Input } from "./ui/input";
+import { Slide, ToastContainer, toast } from "react-toastify";
 
 interface CampaignProps {
   campaignId: number;
@@ -31,15 +32,15 @@ const CampaignCard: React.FC<CampaignProps> = ({
   const router = useRouter();
   const [contribution, setContribution] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [mediaHash, setMediaHash] = useState()
+  const [mediaHash, setMediaHash] = useState();
 
   useEffect(() => {
     const fetchImages = async () => {
       try {
         const contract = await getContract();
-        const { mediaHashes } = await contract.getCampaign(Number(campaignId))
-        console.log(mediaHashes)
-        setMediaHash(mediaHashes)
+        const { mediaHashes } = await contract.getCampaign(Number(campaignId));
+        console.log(mediaHashes);
+        setMediaHash(mediaHashes);
       } catch (error) {
         console.error("Error fetching images from Pinata:", error);
       }
@@ -61,7 +62,18 @@ const CampaignCard: React.FC<CampaignProps> = ({
     e.preventDefault();
     e.stopPropagation();
     if (!contribution || Number(contribution) <= 0) {
-      alert("Please enter a valid contribution amount greater than 0.");
+      // alert("Please enter a valid contribution amount greater than 0.");
+      toast.error("Please enter a valid contribution amount greater than 0.", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
       return;
     }
     setLoading(true);
@@ -71,11 +83,33 @@ const CampaignCard: React.FC<CampaignProps> = ({
         value: ethers.parseEther(contribution),
       });
       await tx.wait();
-      alert("Contribution successful!");
+      // alert("Contribution successful!");
+      toast.success("Contribution Successfully", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
       setContribution("");
     } catch (error) {
       console.error("Error contributing:", error);
-      alert("Failed to contribute");
+      // alert("Failed to contribute");
+      toast.error("Failed to contribute", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
     } finally {
       setLoading(false);
     }
@@ -111,9 +145,7 @@ const CampaignCard: React.FC<CampaignProps> = ({
         <p className="text-sm">
           Creator: {creator.slice(0, 6)}...{creator.slice(-4)}
         </p>
-        <p className="text-sm">
-          Goal: {ethers.formatEther(BigInt(goal))} ETH
-        </p>
+        <p className="text-sm">Goal: {ethers.formatEther(BigInt(goal))} ETH</p>
         <p className="text-sm">
           Raised: {ethers.formatEther(BigInt(totalFunds))} ETH
         </p>

@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
-import CrowdfundingABI from "/home/dhiraj/Desktop/Hackniche_Final/hacksmiths_hackniche3/artifacts/contracts/Crowdfunding.sol/Crowdfunding.json";
-import EscrowABI from "/home/dhiraj/Desktop/Hackniche_Final/hacksmiths_hackniche3/artifacts/contracts/Crowdfunding.sol/Escrow.json";
+import CrowdfundingABI from "/Users/Dhanashri Kuwar/Desktop/hacksmiths_hackniche3/artifacts/contracts/Crowdfunding.sol/Crowdfunding.json";
+import EscrowABI from "/Users/Dhanashri Kuwar/Desktop/hacksmiths_hackniche3/artifacts/contracts/Crowdfunding.sol/Escrow.json";
 
 declare global {
   interface Window {

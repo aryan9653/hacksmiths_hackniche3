@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import CampaignList from "@/components/CampaignList";
 import { Button } from "@/components/ui/button";
 import { connectWallet } from "@/lib/contract";
+import { Slide, toast } from "react-toastify";
 
 const App: React.FC = () => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -35,7 +36,18 @@ const App: React.FC = () => {
       localStorage.setItem("walletAddress", address);
     } catch (error) {
       console.error("Error connecting wallet:", error);
-      alert("Failed to connect wallet");
+      // alert("Failed to connect wallet");
+      toast.error("Failed to connect wallet", {
+        position: "bottom-right",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Slide,
+      });
     }
   };
 
