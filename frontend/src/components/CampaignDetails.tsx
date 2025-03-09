@@ -1,28 +1,37 @@
 "use client";
+
 import { connectWallet, getContract, getEscrowContract } from "@/lib/contract";
 import { ethers } from "ethers";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader } from "./ui/card";
-import { Input } from "./ui/input";
+import { ArrowLeft } from "lucide-react";
+import {
+  Carousel,
+  CarouselMainContainer,
+  CarouselThumbsContainer,
+  SliderMainItem,
+  SliderThumbItem,
+} from "@/components/ui/extension/carousel";
 
-const CampaignDetails: React.FC = () => {
+type Campaign = {
+  creator: string;
+  title: string;
+  description: string;
+  goal: string;
+  deadline: number;
+  totalFunds: string;
+  status: number;
+  fundsReleased: boolean;
+  mediaHashes: string[];
+  escrow: string;
+};
+
+export default function VideoDonationPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
-  const [campaign, setCampaign] = useState<{
-    creator: string;
-    title: string;
-    description: string;
-    goal: string;
-    deadline: number;
-    totalFunds: string;
-    status: number;
-    fundsReleased: boolean;
-    mediaHashes: string[];
-    escrow: string;
-  } | null>(null);
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [escrowBalance, setEscrowBalance] = useState<string>("0");
   const [contributors, setContributors] = useState<string[]>([]);
   const [contributions, setContributions] = useState<string[]>([]);
@@ -49,13 +58,11 @@ const CampaignDetails: React.FC = () => {
         mediaHashes,
         escrow,
       ] = await contract.getCampaign(Number(id));
+
       const fetchedContributors = await contract.getContributors(Number(id));
       const fetchedContributions = await Promise.all(
         fetchedContributors.map(async (contributor: string) => {
-          const contribution = await contract.getContribution(
-            Number(id),
-            contributor
-          );
+          const contribution = await contract.getContribution(Number(id), contributor);
           return contribution.toString();
         })
       );
@@ -120,9 +127,7 @@ const CampaignDetails: React.FC = () => {
     };
 
     setupEventListeners();
-
     const pollingInterval = setInterval(fetchData, 5000);
-
     return () => clearInterval(pollingInterval);
   }, [id]);
 
@@ -182,12 +187,20 @@ const CampaignDetails: React.FC = () => {
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
-      <p className="text-center text-gray-600">Loading campaign details...</p>
+      <div className="min-h-screen flex items-center justify-center ">
+        Loading campaign details...
+      </div>
     );
-  if (!campaign)
-    return <p className="text-center text-gray-600">Campaign not found.</p>;
+  }
+  if (!campaign) {
+    return (
+      <div className="min-h-screen flex items-center justify-center ">
+        Campaign not found.
+      </div>
+    );
+  }
 
   const progress = Math.min(
     (Number(campaign.totalFunds) / Number(campaign.goal)) * 100,
@@ -215,173 +228,196 @@ const CampaignDetails: React.FC = () => {
     refundLoading ||
     !canRefund ||
     (isContributor &&
-    refunded[contributors.indexOf(walletAddress)] !== undefined
-      ? refunded[contributors.indexOf(walletAddress)]
-      : false);
+      refunded[contributors.indexOf(walletAddress)] !== undefined
+        ? refunded[contributors.indexOf(walletAddress)]
+        : false);
+
+  // Dynamic carousel using campaign media
+  const DynamicCarousel = () => {
+    if (campaign.mediaHashes.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-[500px] bg-gray-700 rounded-md">
+          <p className="">No media available</p>
+        </div>
+      );
+    }
+    return (
+      <Carousel orientation="horizontal" className="flex flex-col items-center gap-2">
+        <CarouselMainContainer className="h-[500px] w-[1000px] bg-black">
+          {campaign.mediaHashes.map((hash, index) => {
+            const mediaUrl = `https://gateway.pinata.cloud/ipfs/${hash}`;
+            return (
+              <SliderMainItem
+                key={index}
+                className="border border-muted flex items-center justify-center h-[500px] rounded-md"
+              >
+                <Media url={mediaUrl} />
+              </SliderMainItem>
+            );
+          })}
+        </CarouselMainContainer>
+        <CarouselThumbsContainer className="basis-1/4">
+          {campaign.mediaHashes.map((hash, index) => {
+            const mediaUrl = `https://gateway.pinata.cloud/ipfs/${hash}`;
+            return (
+              <SliderThumbItem
+                key={index}
+                index={index}
+                className="rounded-md bg-transparent h-[200px]"
+              >
+                <Media url={mediaUrl} />
+              </SliderThumbItem>
+            );
+          })}
+        </CarouselThumbsContainer>
+      </Carousel>
+    );
+  };
+
+  // Media component: try rendering as an image first, then fall back to video if loading fails
+  const Media: React.FC<{ url: string }> = ({ url }) => {
+    const [isVideo, setIsVideo] = useState(false);
+
+    if (isVideo) {
+      return (
+        <video
+          controls
+          className="w-full h-full rounded-md"
+          preload="metadata"
+        >
+          <source src={url} />
+          Your browser does not support the video tag.
+        </video>
+      );
+    }
+
+    return (
+      <img
+        src={url}
+        alt="Campaign media"
+        className="w-full h-full object-cover rounded-md"
+        loading="lazy"
+        onError={() => setIsVideo(true)}
+      />
+    );
+  };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto border rounded-lg shadow-md hover:shadow-lg transition-shadow mt-4">
-      <CardHeader className="p-4 bg-gray-50">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          {campaign.title}
-        </h1>
-      </CardHeader>
-      <CardContent className="p-4 space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Left Side: Media */}
-          <div className="w-full md:w-1/2">
-            {campaign.mediaHashes.length > 0 ? (
-              campaign.mediaHashes.map((hash, index) => {
-                // Use your Pinata gateway or any other preferred gateway
-                const mediaUrl = `https://gateway.pinata.cloud/ipfs/${hash}`;
-                return <Media key={index} url={mediaUrl} />;
-              })
-            ) : (
-              <p className="text-gray-600">No media available</p>
-            )}
-          </div>
-
-          {/* Right Side: Details */}
-          <div className="w-full md:w-1/2 space-y-4">
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-black bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/your-background-image.jpg')" }}
+    >
+      {/* Back Button */}
+      <div className="absolute top-4 left-4">
+        <button
+          onClick={() => router.push("/")}
+          className="flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors"
+        >
+          <ArrowLeft size={20} /> Back
+        </button>
+      </div>
+      <div className="p-8 w-full bg-white bg-opacity-10 backdrop-blur-md shadow-xl rounded-lg flex">
+        {/* Left Section: Media Carousel */}
+        <div className="w-2/3 pr-6">
+          <DynamicCarousel />
+        </div>
+        {/* Right Section: Campaign Details */}
+        <div className="w-1/3 pl-6 flex flex-col p-5">
+          <h1 className="text-3xl font-bold text-white mb-4 text-center">
+            {campaign.title}
+          </h1>
+          <p className="text-lg text-gray-300 mb-4 break-words">{campaign.description}</p>
+          <div className="flex justify-between text-gray-300 text-lg mb-6">
             <p>
-              <strong>Creator:</strong> {campaign.creator.slice(0, 6)}...
-              {campaign.creator.slice(-4)}
-            </p>
-            <p>{campaign.description}</p>
-            <p>
-              <strong>Goal:</strong> {ethers.formatEther(BigInt(campaign.goal))}{" "}
-              ETH
+              <strong>Target:</strong>{" "}
+              {ethers.formatEther(BigInt(campaign.goal))} ETH
             </p>
             <p>
               <strong>Raised:</strong>{" "}
               {ethers.formatEther(BigInt(campaign.totalFunds))} ETH
             </p>
-            <p>
-              <strong>Deadline:</strong>{" "}
-              {new Date(campaign.deadline * 1000).toLocaleString()}
-            </p>
-            <p>
-              <strong>Status:</strong> {statusText}
-            </p>
-            <p>
-              <strong>Escrow:</strong> {campaign.escrow.slice(0, 6)}...
-              {campaign.escrow.slice(-4)}
-            </p>
-            <p>
-              <strong>Escrow Balance:</strong> {escrowBalance} ETH
-            </p>
-            <p>
-              <strong>Funds Released:</strong>{" "}
-              {campaign.fundsReleased ? "Yes" : "No"}
-            </p>
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-              <div
-                className="bg-blue-600 h-2.5 rounded-full"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-            <p className="text-xs text-gray-500 text-center">
-              {progress.toFixed(2)}% Funded
-            </p>
-            {campaign.status === 0 && (
-              <form onSubmit={contribute} className="w-full">
-                <div className="flex space-x-2">
-                  <Input
-                    type="number"
-                    step="0.1"
-                    value={contribution}
-                    onChange={(e) => setContribution(e.target.value)}
-                    placeholder="Enter amount in ETH"
-                    className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                  <Button
-                    type="submit"
-                    disabled={contributeDisabled}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-                  >
-                    {contributeLoading ? "Contributing..." : "Contribute"}
-                  </Button>
-                </div>
-              </form>
-            )}
-            {canRelease && (
-              <Button
-                onClick={releaseFunds}
-                disabled={releaseDisabled}
-                className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors"
-              >
-                {releaseLoading ? "Releasing..." : "Release Funds"}
-              </Button>
-            )}
-            {canRefund && (
-              <Button
-                onClick={refund}
-                disabled={refundDisabled}
-                className="w-full bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 disabled:bg-gray-400 transition-colors"
-              >
-                {refundLoading ? "Refunding..." : "Request Refund"}
-              </Button>
-            )}
           </div>
-        </div>
-
-        <h2 className="text-xl font-semibold mt-4">Contributors:</h2>
-        <ul className="mt-2 space-y-2">
-          {contributors.length > 0 ? (
-            contributors.map((contributor: string, index: number) => (
-              <li
-                key={index}
-                className="p-3 bg-gray-50 rounded-lg border border-gray-200"
-              >
-                <p className="text-sm text-gray-700">
-                  {contributor}:{" "}
-                  {ethers.formatEther(BigInt(contributions[index] || "0"))} ETH
-                  {refunded[index] && " (Refunded)"}
-                </p>
-              </li>
-            ))
-          ) : (
-            <p className="text-sm text-gray-600">No contributors yet.</p>
+          <p className=" mb-2 text-gray-300">
+            <strong>Deadline:</strong>{" "}
+            {new Date(campaign.deadline * 1000).toLocaleString()}
+          </p>
+          <p className=" mb-2 text-gray-300">
+            <strong>Status:</strong> {statusText}
+          </p>
+          <p className=" mb-2 text-gray-300">
+            <strong>Escrow:</strong> {campaign.escrow.slice(0, 6)}...
+            {campaign.escrow.slice(-4)}
+          </p>
+          <p className=" mb-4 text-gray-300">
+            <strong>Escrow Balance:</strong> {escrowBalance} ETH
+          </p>
+          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+            <div
+              className="bg-blue-600 h-2.5 rounded-full"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          {campaign.status === 0 && (
+            <form onSubmit={contribute} className="w-full mb-4">
+              <div className="flex space-x-2">
+                <input
+                  type="number"
+                  step="0.1"
+                  value={contribution}
+                  onChange={(e) => setContribution(e.target.value)}
+                  placeholder="Enter amount in ETH"
+                  className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={contributeDisabled}
+                  className="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                >
+                  {contributeLoading ? "Contributing..." : "Contribute"}
+                </button>
+              </div>
+            </form>
           )}
-        </ul>
-      </CardContent>
-    </Card>
+          {canRelease && (
+            <button
+              onClick={releaseFunds}
+              disabled={releaseDisabled}
+              className="w-full bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors mb-4"
+            >
+              {releaseLoading ? "Releasing..." : "Release Funds"}
+            </button>
+          )}
+          {canRefund && (
+            <button
+              onClick={refund}
+              disabled={refundDisabled}
+              className="w-full bg-yellow-600 px-4 py-2 rounded-lg hover:bg-yellow-700 disabled:bg-gray-400 transition-colors mb-4"
+            >
+              {refundLoading ? "Refunding..." : "Request Refund"}
+            </button>
+          )}
+          <h2 className="text-xl font-semibold text-gray-300 mt-4">Contributors:</h2>
+          <ul className="mt-2 space-y-2 overflow-y-auto max-h-48">
+            {contributors.length > 0 ? (
+              contributors.map((contributor: string, index: number) => (
+                <li
+                  key={index}
+                  className="p-3 bg-white bg-opacity-20 rounded-lg border border-gray-200"
+                >
+                  <p className="text-sm">
+                    {contributor}:{" "}
+                    {ethers.formatEther(BigInt(contributions[index] || "0"))} ETH
+                    {refunded[index] && " (Refunded)"}
+                  </p>
+                </li>
+              ))
+            ) : (
+              <p className="text-sm text-gray-300">No contributors yet.</p>
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
   );
-};
-interface MediaProps {
-  url: string;
 }
-
-const Media: React.FC<MediaProps> = ({ url }) => {
-  const [isVideo, setIsVideo] = useState(false);
-
-  // If isVideo is true, render a video player.
-  if (isVideo) {
-    return (
-      <video
-        controls
-        autoPlay
-        className="w-full h-auto mb-2 rounded-lg"
-        preload="metadata"
-        poster="https://placehold.co/400x300" // Optional poster image
-      >
-        <source src={url} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-    );
-  }
-
-  // Otherwise, try to render an image.
-  return (
-    <img
-      src={url}
-      alt="Campaign media"
-      className="w-full h-auto mb-2 rounded-lg"
-      loading="lazy"
-      onError={() => setIsVideo(true)}
-    />
-  );
-};
-
-export default CampaignDetails;

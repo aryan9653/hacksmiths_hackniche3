@@ -1,11 +1,14 @@
 "use client";
+import React, { useState, useEffect } from "react";
+import { User, PlusCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import CampaignList from "@/components/CampaignList";
 import { Button } from "@/components/ui/button";
 import { connectWallet } from "@/lib/contract";
-import { useEffect, useState } from "react";
 
-export default function Home() {
+const App: React.FC = () => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchWallet = async () => {
@@ -37,25 +40,46 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Crowdfunding Campaigns
+    <div className="min-h-screen bg-black text-white py-10 px-6">
+      {/* Header */}
+      <header className="flex items-center justify-between mb-10">
+        <h1 className="text-3xl font-extrabold tracking-tight cursor-pointer">
+          CrowdFundX
         </h1>
-        {!walletAddress ? (
+        <div className="flex items-center space-x-4">
+          {!walletAddress ? (
+            <Button
+              onClick={handleConnectWallet}
+              className="bg-white text-black hover:bg-gray-200 transition-colors"
+            >
+              Connect Wallet
+            </Button>
+          ) : (
+            <span className="text-sm">
+              Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+            </span>
+          )}
+          <div className="border border-white p-2 rounded-full hover:bg-white hover:text-black transition-colors cursor-pointer">
+            <User size={24} />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold"></h2>
           <Button
-            onClick={handleConnectWallet}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            onClick={() => router.push("/create")}
+            className="flex items-center gap-2 bg-white text-black hover:bg-gray-200 transition-colors"
           >
-            Connect Wallet
+            <PlusCircle size={20} /> Add New Campaign
           </Button>
-        ) : (
-          <p className="text-sm text-gray-600">
-            Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-          </p>
-        )}
-      </div>
-      <CampaignList />
+        </div>
+        <CampaignList />
+      </main>
     </div>
   );
-}
+};
+
+export default App;

@@ -93,7 +93,7 @@ const CampaignList: React.FC = () => {
         Ongoing Campaigns
       </h2>
       {ongoingCampaigns.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 mb-8">
           {ongoingCampaigns.map((campaign) => (
             <CampaignCard key={campaign.campaignId} {...campaign} />
           ))}
@@ -108,7 +108,7 @@ const CampaignList: React.FC = () => {
         Past Campaigns
       </h2>
       {pastCampaigns.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
           {pastCampaigns.map((campaign) => (
             <CampaignCard key={campaign.campaignId} {...campaign} />
           ))}

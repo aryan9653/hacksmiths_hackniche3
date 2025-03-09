@@ -4,8 +4,8 @@ import { Readable } from "stream";
 
 // Initialize Pinata with environment variables
 const pinata = new PinataSDK({
-  pinataApiKey: process.env.PINATA_API_KEY,
-  pinataSecretApiKey: process.env.PINATA_SECRET_API_KEY,
+  pinataApiKey: "ec47480c8b992ba8a508",
+  pinataSecretApiKey: "1db10325515c7065b6147cb10151d578284af8b9b20f931a8e55acdde674e1fa",
 });
 
 // Disable default body parser for handling multipart/form-data

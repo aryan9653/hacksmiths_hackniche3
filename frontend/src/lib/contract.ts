@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
-import CrowdfundingABI from "/home/harsh/Hackniche/hacksmiths_hackniche3/artifacts/contracts/Crowdfunding.sol/Crowdfunding.json";
-import EscrowABI from "/home/harsh/Hackniche/hacksmiths_hackniche3/artifacts/contracts/Crowdfunding.sol/Escrow.json";
+import CrowdfundingABI from "/home/dhiraj/Desktop/Hackniche_Final/hacksmiths_hackniche3/artifacts/contracts/Crowdfunding.sol/Crowdfunding.json";
+import EscrowABI from "/home/dhiraj/Desktop/Hackniche_Final/hacksmiths_hackniche3/artifacts/contracts/Crowdfunding.sol/Escrow.json";
 
 declare global {
   interface Window {
@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-const contractAddress = "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318";
+const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 export const getContract = async () => {
   if (!window.ethereum) throw new Error("Please install MetaMask");

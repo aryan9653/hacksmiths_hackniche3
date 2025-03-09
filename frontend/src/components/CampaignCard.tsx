@@ -2,7 +2,7 @@
 import { getContract } from "@/lib/contract";
 import { ethers } from "ethers";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { Input } from "./ui/input";
@@ -31,6 +31,22 @@ const CampaignCard: React.FC<CampaignProps> = ({
   const router = useRouter();
   const [contribution, setContribution] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [mediaHash, setMediaHash] = useState()
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const contract = await getContract();
+        const { mediaHashes } = await contract.getCampaign(Number(campaignId))
+        console.log(mediaHashes)
+        setMediaHash(mediaHashes)
+      } catch (error) {
+        console.error("Error fetching images from Pinata:", error);
+      }
+    };
+
+    fetchImages();
+  }, []);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const isInteractive =
@@ -77,40 +93,43 @@ const CampaignCard: React.FC<CampaignProps> = ({
 
   return (
     <Card
-      className="w-full max-w-sm border rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+      className="w-full max-w-sm bg-black border border-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
       onClick={handleClick}
     >
-      <CardHeader className="p-4 bg-gray-50">
-        <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+      <CardHeader className="p-0">
+        <img
+          src={`https://picsum.photos/seed/picsum/200/300`}
+          alt={title}
+          className="w-full h-48 object-cover rounded-t-lg"
+        />
+        <div className="p-4 bg-black">
+          <h2 className="text-xl font-bold text-white">{title}</h2>
+        </div>
       </CardHeader>
-      <CardContent className="p-4 space-y-2">
-        <p className="text-sm text-gray-600">{description}</p>
-        <p className="text-sm text-gray-600">
+      <CardContent className="p-4 space-y-2 bg-black text-white">
+        <p className="text-sm">{description}</p>
+        <p className="text-sm">
           Creator: {creator.slice(0, 6)}...{creator.slice(-4)}
         </p>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm">
           Goal: {ethers.formatEther(BigInt(goal))} ETH
         </p>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm">
           Raised: {ethers.formatEther(BigInt(totalFunds))} ETH
         </p>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm">
           Deadline: {new Date(deadline * 1000).toLocaleString()}
         </p>
-        <p className="text-sm font-medium text-gray-800">
-          Status: {statusText}
-        </p>
-        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+        <p className="text-sm font-medium">Status: {statusText}</p>
+        <div className="w-full bg-black border border-white rounded-full h-2.5 mt-2">
           <div
-            className="bg-blue-600 h-2.5 rounded-full"
+            className="bg-white h-2.5 rounded-full"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
-        <p className="text-xs text-gray-500 text-center">
-          {progress.toFixed(2)}% Funded
-        </p>
+        <p className="text-xs text-center">{progress.toFixed(2)}% Funded</p>
       </CardContent>
-      <CardFooter className="p-4">
+      <CardFooter className="p-4 bg-black">
         {status === 0 && (
           <form
             onSubmit={contribute}
@@ -123,15 +142,15 @@ const CampaignCard: React.FC<CampaignProps> = ({
                 step="0.1"
                 value={contribution}
                 onChange={(e) => setContribution(e.target.value)}
-                placeholder="Enter amount in ETH"
-                className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter ETH amount"
+                className="flex-1 p-2 bg-black text-white border border-white rounded-lg focus:ring-2 focus:ring-white"
                 required
                 onClick={(e) => e.stopPropagation()}
               />
               <Button
                 type="submit"
                 disabled={loading}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                className="bg-white text-black px-4 py-2 rounded-lg hover:ring-2 hover:ring-white disabled:opacity-50 transition-all"
                 onClick={(e) => e.stopPropagation()}
               >
                 {loading ? "Contributing..." : "Contribute"}
